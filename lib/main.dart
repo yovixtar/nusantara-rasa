@@ -1,5 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:nusantara/color.dart';
+import 'package:nusantara/services/firebase_options.dart';
+import 'package:nusantara/services/notification.dart';
 import 'package:nusantara/services/providers/cart_provider.dart';
 import 'package:nusantara/services/session.dart';
 import 'package:nusantara/vews/auth/login.dart';
@@ -7,7 +11,27 @@ import 'package:nusantara/vews/auth/register.dart';
 import 'package:nusantara/vews/layout_menu.dart';
 import 'package:provider/provider.dart';
 
-void main() => runApp(NusantaraDelightApp());
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+  await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  print("FCMToken $fcmToken");
+
+  runApp(NusantaraDelightApp());
+}
 
 class NusantaraDelightApp extends StatelessWidget {
   @override
@@ -39,6 +63,8 @@ class _FirstScreenState extends State<FirstScreen> {
   void initState() {
     super.initState();
     _checkAuth();
+    _setupFirebaseMessagingListeners();
+    LocalNotificationService.initialize();
   }
 
   Future<void> _checkAuth() async {
@@ -50,8 +76,34 @@ class _FirstScreenState extends State<FirstScreen> {
           context,
           MaterialPageRoute(builder: (context) => LayoutMenu()),
         );
-      } else {}
-    } else {}
+      }
+    }
+  }
+
+  void _setupFirebaseMessagingListeners() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        LocalNotificationService.display(message);
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LayoutMenu()),
+      );
+    });
+
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage? message) {
+      if (message != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LayoutMenu()),
+        );
+      }
+    });
   }
 
   @override
