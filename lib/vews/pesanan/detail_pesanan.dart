@@ -31,7 +31,10 @@ class DetailPesananPage extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
-              'Rp ${pesanan.total}',
+              'Rp. ' +
+                  pesanan.total.replaceAllMapped(
+                      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                      (Match m) => '${m[1]}.'),
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 20),
@@ -41,6 +44,24 @@ class DetailPesananPage extends StatelessWidget {
             ),
             Text(
               '${pesanan.pengambilan}',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Alamat:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '${pesanan.alamat}',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Catatan Tambahan:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '${pesanan.catatan}',
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 20),
@@ -87,7 +108,7 @@ class DetailPesananPage extends StatelessWidget {
                             style: TextStyle(fontSize: 14, color: Colors.black),
                           ),
                           Text(
-                            'Harga: Rp ' +
+                            'Harga: Rp. ' +
                                 item.makanan.harga.replaceAllMapped(
                                     RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
                                     (Match m) => '${m[1]}.'),

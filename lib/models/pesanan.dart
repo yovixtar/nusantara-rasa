@@ -30,6 +30,8 @@ class Pesanan {
   final List<PesananItem> pesananItems;
   final String total;
   final String pengambilan;
+  final String alamat;
+  final String catatan;
 
   Pesanan({
     this.id,
@@ -37,6 +39,8 @@ class Pesanan {
     required this.pesananItems,
     required this.total,
     required this.pengambilan,
+    required this.alamat,
+    required this.catatan,
   });
 
   factory Pesanan.fromJson(Map<String, dynamic> json) {
@@ -48,6 +52,8 @@ class Pesanan {
           .toList(),
       total: json['total'],
       pengambilan: json['pengambilan'],
+      alamat: json['alamat'],
+      catatan: json['catatan'],
     );
   }
 
@@ -58,6 +64,8 @@ class Pesanan {
       'menus': pesananItems.map((item) => item.toJson()).toList(),
       'total': total,
       'pengambilan': pengambilan,
+      'alamat': alamat,
+      'catatan': catatan,
     };
   }
 }

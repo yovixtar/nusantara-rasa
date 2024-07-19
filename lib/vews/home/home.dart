@@ -2,9 +2,12 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:nusantara/color.dart';
 import 'package:nusantara/models/makanan.dart';
+import 'package:nusantara/models/promo.dart';
 import 'package:nusantara/services/apis/menu.dart';
+import 'package:nusantara/services/apis/promo.dart';
 import 'package:nusantara/vews/home/tab_recomendation.dart';
 import 'package:nusantara/vews/makanan/semua_makanan.dart';
+import 'package:nusantara/vews/promo/promo.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,6 +16,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<List<Makanan>> futureMakanan;
+  late Future<List<Promo>> futurePromo;
 
   Future<List<Makanan>> fetchMakanan() async {
     try {
@@ -23,14 +27,20 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  final List<String> imgList = [
-    'assets/images/banner2.png',
-  ];
+  Future<List<Promo>> fetchPromo() async {
+    try {
+      List<Promo> result = await PromoService().fetchPromo();
+      return result;
+    } catch (e) {
+      return [];
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     futureMakanan = fetchMakanan();
+    futurePromo = fetchPromo();
   }
 
   @override
@@ -83,18 +93,43 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildCarouselSlider() {
-    return CarouselSlider(
-      options: CarouselOptions(
-        height: 200.0,
-        autoPlay: true,
-        enlargeCenterPage: true,
-      ),
-      items: imgList
-          .map((item) => Container(
-                child: Center(
-                    child: Image.asset(item, fit: BoxFit.cover, width: 1000)),
-              ))
-          .toList(),
+    return FutureBuilder<List<Promo>>(
+      future: futurePromo,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error loading promos'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No promos available'));
+        } else {
+          return CarouselSlider(
+            options: CarouselOptions(
+              height: 200.0,
+              autoPlay: true,
+              enlargeCenterPage: true,
+            ),
+            items: snapshot.data!
+                .map((promo) => GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PromoDetailPage(promo: promo),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        child: Center(
+                          child: Image.network(promo.gambar,
+                              fit: BoxFit.cover, width: 1000),
+                        ),
+                      ),
+                    ))
+                .toList(),
+          );
+        }
+      },
     );
   }
 

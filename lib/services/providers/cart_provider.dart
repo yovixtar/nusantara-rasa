@@ -43,7 +43,7 @@ class CartItemProvider extends ChangeNotifier {
 
   void decreaseQuantity(int makananId) {
     for (var item in _pesananItems) {
-      if (item.makanan.id == makananId && int.parse(item.jumlah) > 1) {
+      if (item.makanan.id == makananId && int.parse(item.jumlah) >= 1) {
         item.jumlah = (int.parse(item.jumlah) - 1).toString();
         break;
       }

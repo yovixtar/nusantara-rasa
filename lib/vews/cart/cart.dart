@@ -16,18 +16,25 @@ class _CartPageState extends State<CartPage> {
   String deliveryMethod = 'Dine-In';
   bool isLoading = false;
 
+  final TextEditingController _alamatController = TextEditingController();
+  final TextEditingController _catatanController = TextEditingController();
+
   handlePesanan(List<Map<String, dynamic>> pesananItem, int total,
-      String pengambilan) async {
+      String pengambilan, String alamat, String catatan) async {
     setState(() {
       isLoading = true;
     });
 
     final result = await PesananService().pesanMenu(
-        pesananItem: pesananItem, total: total, pengambilan: pengambilan);
+        pesananItem: pesananItem,
+        total: total,
+        pengambilan: pengambilan,
+        alamat: alamat,
+        catatan: catatan);
 
     if (result) {
       Provider.of<CartItemProvider>(context, listen: false).clearItems();
-      SnackbarUtils.showSuccessSnackbar(context, "berhasil memesan menu !");
+      SnackbarUtils.showSuccessSnackbar(context, "Berhasil memesan menu!");
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const LayoutMenu(
@@ -36,12 +43,80 @@ class _CartPageState extends State<CartPage> {
         ),
       );
     } else {
-      SnackbarUtils.showErrorSnackbar(context, "Gagal memesan menu !");
+      SnackbarUtils.showErrorSnackbar(context, "Gagal memesan menu!");
     }
 
     setState(() {
       isLoading = false;
     });
+  }
+
+  void _showAddressNoteDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SingleChildScrollView(
+          child: AlertDialog(
+            title: Text('Isi Alamat dan Catatan Tambahan'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _alamatController,
+                  decoration: InputDecoration(labelText: 'Alamat'),
+                  minLines: 1,
+                  maxLines: 5,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                TextField(
+                  controller: _catatanController,
+                  decoration: InputDecoration(labelText: 'Catatan Tambahan'),
+                  minLines: 1,
+                  maxLines: 5,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Batal'),
+              ),
+              TextButton(
+                onPressed: () {
+                  final alamat = _alamatController.text.isEmpty
+                      ? ''
+                      : _alamatController.text;
+                  final catatan = _catatanController.text.isEmpty
+                      ? ''
+                      : _catatanController.text;
+
+                  final cartProvider =
+                      Provider.of<CartItemProvider>(context, listen: false);
+                  final orderItemsJson = cartProvider.orderItems
+                      .map((item) => item.toJson())
+                      .toList();
+
+                  Navigator.of(context).pop();
+
+                  handlePesanan(
+                    orderItemsJson,
+                    cartProvider.totalPrice(),
+                    deliveryMethod,
+                    alamat,
+                    catatan,
+                  );
+                },
+                child: Text('Kirim'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -176,7 +251,7 @@ class _CartPageState extends State<CartPage> {
                 ],
               ),
               child: Text(
-                'Total : \nRp ' +
+                'Total : \nRp. ' +
                     cartProvider.totalPrice().toString().replaceAllMapped(
                         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
                         (Match m) => '${m[1]}.'),
@@ -193,19 +268,17 @@ class _CartPageState extends State<CartPage> {
           FloatingActionButton.extended(
             backgroundColor: primaryColor,
             onPressed: () async {
-              final orderItemsJson =
-                  cartProvider.orderItems.map((item) => item.toJson()).toList();
-
-              (cartProvider.orderItems.isEmpty)
-                  ? SnackbarUtils.showErrorSnackbar(
-                      context, "Silahkan memilih makanan kesukaan anda !")
-                  : isLoading
-                      ? null
-                      : handlePesanan(orderItemsJson, cartProvider.totalPrice(),
-                          deliveryMethod);
+              if (cartProvider.orderItems.isEmpty) {
+                SnackbarUtils.showErrorSnackbar(
+                    context, "Silahkan memilih makanan kesukaan anda !");
+              } else {
+                _showAddressNoteDialog();
+              }
             },
-            label: (isLoading)
-                ? CircularProgressIndicator()
+            label: isLoading
+                ? CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
                 : Text(
                     'Pesan Sekarang',
                     style: TextStyle(

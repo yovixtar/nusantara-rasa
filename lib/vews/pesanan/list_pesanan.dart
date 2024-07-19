@@ -85,7 +85,7 @@ class _PesananPagePageState extends State<PesananPage> {
                               ),
                               SizedBox(height: 5),
                               Text(
-                                'Total: Rp ' +
+                                'Total: Rp. ' +
                                     pesanan.total.replaceAllMapped(
                                         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
                                         (Match m) => '${m[1]}.'),

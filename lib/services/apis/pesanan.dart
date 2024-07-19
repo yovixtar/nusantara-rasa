@@ -11,6 +11,8 @@ class PesananService {
     List<Map<String, dynamic>>? pesananItem,
     int? total,
     String? pengambilan,
+    String? alamat,
+    String? catatan,
   }) async {
     var pengguna = await SessionManager.getUsername();
     var url = Uri.parse(baseUrl);
@@ -21,6 +23,8 @@ class PesananService {
         'menus': pesananItem,
         "total": "$total",
         "pengambilan": "$pengambilan",
+        "alamat": "$alamat",
+        "catatan": "$catatan",
       },
     ]);
 

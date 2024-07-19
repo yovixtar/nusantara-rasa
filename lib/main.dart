@@ -64,11 +64,13 @@ class _FirstScreenState extends State<FirstScreen> {
         children: [
           Container(
             child: Image.asset(
-              'assets/images/logo_nr.png',
-              height: 300,
+              'assets/images/logo.png',
+              width: 300,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(
+            height: 10,
+          ),
           Container(
             width: MediaQuery.of(context).size.width * 0.6,
             child: ElevatedButton(

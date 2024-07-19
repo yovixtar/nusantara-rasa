@@ -72,7 +72,7 @@ class MakananItem extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 16.0),
                                   child: Text(
-                                    'Rp ' +
+                                    'Rp. ' +
                                         makanan.harga.replaceAllMapped(
                                             RegExp(
                                                 r'(\d{1,3})(?=(\d{3})+(?!\d))'),
@@ -184,7 +184,7 @@ class MakananItem extends StatelessWidget {
                     ),
                     SizedBox(height: 6),
                     Text(
-                      'Rp ' +
+                      'Rp. ' +
                           makanan.harga.replaceAllMapped(
                               RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
                               (Match m) => '${m[1]}.'),
