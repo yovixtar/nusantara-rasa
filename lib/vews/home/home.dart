@@ -103,30 +103,41 @@ class _HomePageState extends State<HomePage> {
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(child: Text('No promos available'));
         } else {
+          List<Widget> carouselItems = [
+            Container(
+              child: Center(
+                child: Image.asset('assets/images/banner.png',
+                    fit: BoxFit.cover, width: 1000),
+              ),
+            ),
+          ];
+
+          carouselItems.addAll(snapshot.data!
+              .map((promo) => GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PromoDetailPage(promo: promo),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      child: Center(
+                        child: Image.network(promo.gambar,
+                            fit: BoxFit.cover, width: 1000),
+                      ),
+                    ),
+                  ))
+              .toList());
+
           return CarouselSlider(
             options: CarouselOptions(
               height: 200.0,
               autoPlay: true,
               enlargeCenterPage: true,
             ),
-            items: snapshot.data!
-                .map((promo) => GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PromoDetailPage(promo: promo),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        child: Center(
-                          child: Image.network(promo.gambar,
-                              fit: BoxFit.cover, width: 1000),
-                        ),
-                      ),
-                    ))
-                .toList(),
+            items: carouselItems,
           );
         }
       },
